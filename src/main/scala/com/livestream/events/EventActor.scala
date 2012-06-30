@@ -6,6 +6,8 @@ import java.io.StringWriter
 
 import org.apache.commons.io.IOUtils
 
+import com.codahale.jerkson.Json._
+
 /**
  *  TODO: Not really an actor yet, but we'll deal with that later
 **/
@@ -25,6 +27,8 @@ class EventActor {
 
   def isEventLive(event: Event): Boolean = {
     val jsonStr = getURLString(event.url)
-    false
+    val jsonMap = parse[Map[String,Any]](jsonStr)
+    val broadcastId = jsonMap("broadcast_id").toString.toInt
+    broadcastId >= 0
   }
 }
