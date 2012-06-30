@@ -3,6 +3,12 @@ package com.livestream.events
 import java.util.Date
 
 object Main extends App {
+if(args.length != 2) {
+  println("required args, in seconds: [poll-interval] [run-time]")
+} else {
+  val pollInterval = args(0).toInt
+  val runTime = args(1).toInt
+
   val eventServer = new EventServer(
     Map[String,Event](
       "Wimbledon Day 5" -> new Event(
@@ -21,32 +27,18 @@ object Main extends App {
       println("%s - %s - Event:'%s' Status: %s".format(
         new Date, Thread.currentThread.getName, eventName, isLive))
 
-  val eventClient1 = new EventClient("localhost", 9999)
-  eventClient1.startPoll(
+  val eventClient = new EventClient("localhost", 9999)
+  eventClient.startPoll(
     "Wimbledon Day 5",
-    5 * 1000,
+    pollInterval * 1000,
     eventHandler
   )
+ 
+  Thread.sleep(runTime * 1000)
 
-  Thread.sleep((10 * 1000) + 1000)
-
-  println("Start Second EventClient")
-  val eventClient2 = new EventClient("localhost", 9999)
-  eventClient2.startPoll(
-    "Wimbledon Day 5",
-    5 * 1000,
-    eventHandler
-  )
-
-  Thread.sleep((10 * 1000) + 1000)
-
-  println("Kill client & server")
-  eventClient1.stopPoll
-  eventClient1.close
-
-  eventClient2.stopPoll
-  eventClient2.close
+  eventClient.stopPoll
+  eventClient.close
 
   eventServer.stop
   println("Done")
-}
+}}

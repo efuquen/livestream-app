@@ -8,9 +8,9 @@ import org.apache.commons.io.IOUtils
 
 import com.codahale.jerkson.Json._
 
-import akka.actor.Actor
+//import akka.actor.Actor
 
-class EventActor extends Actor {
+class EventActor { //extends Actor {
 
   private def getURLString(urlStr: String): String = {
     val url = new URL(urlStr)
@@ -31,8 +31,8 @@ class EventActor extends Actor {
     broadcastId >= 0
   }
 
-  def receive = {
+  /*def receive = {
     case ('GetEventLive, event: Event) =>
       sender ! (('SendEventLive, event, isEventLive(event)))
-  }
+  }*/
 }

@@ -1,6 +1,6 @@
 package com.livestream.events
 
-import java.net.ServerSocket 
+import java.net.{ServerSocket,Socket}
 
 import java.io.{BufferedReader,InputStreamReader,PrintWriter}
 
@@ -27,14 +27,13 @@ class EventServer(
     20, 50, 60, TimeUnit.MINUTES, new LinkedBlockingQueue[Runnable]
   )
 
-  val lock = new Object
-  val serverThread = new Thread(new Runnable { def run {
-    println("Event Server Started")
-    while(!Thread.interrupted) {
-      val sock = server.accept
-      val sockIn = new BufferedReader(new InputStreamReader(sock.getInputStream))
-      val sockOut = new PrintWriter(sock.getOutputStream)
-      sockThreadPool.execute(new Runnable { def run { try {
+  class SockRunnable(
+    sock: Socket,
+    sockIn: BufferedReader,
+    sockOut: PrintWriter
+  ) extends Runnable {
+    override def run {
+      try {
         var keepAlive = true
         while(keepAlive) {
           val command = sockIn.readLine
@@ -68,7 +67,23 @@ class EventServer(
         try { sockIn.close } catch { case ex: Exception => ex.printStackTrace }
         try { sockOut.close } catch { case ex: Exception => ex.printStackTrace }
         try { sock.close } catch { case ex: Exception => ex.printStackTrace }
-      }}})
+      }
+    }
+  }
+
+  val lock = new Object
+  val serverThread = new Thread(new Runnable { def run {
+    println("Event Server Started")
+    while(!Thread.interrupted) {
+      try {
+        val sock = server.accept
+        val sockIn = new BufferedReader(new InputStreamReader(sock.getInputStream))
+        val sockOut = new PrintWriter(sock.getOutputStream)
+        sockThreadPool.execute(new SockRunnable(sock, sockIn, sockOut))
+      } catch {
+        case ex: Exception =>
+          Thread.currentThread.interrupt
+      }
     }
     println("Event Server Stopped")
   }})
