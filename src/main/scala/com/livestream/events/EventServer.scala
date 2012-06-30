@@ -39,10 +39,12 @@ class EventServer(
             if(events.contains(eventName)) {
               val event = events(eventName)
               val isLive = eventActor.isEventLive(event)
+              sockOut.println("SEND_LIVESTATUS")
               sockOut.println(isLive)
               sockOut.flush
             } else {
-              sockOut.println("false")
+              sockOut.println("ERROR")
+              sockOut.println("EventDNE")
               sockOut.flush
             }
           case _ =>
