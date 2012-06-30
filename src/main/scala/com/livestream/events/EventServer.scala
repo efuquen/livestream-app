@@ -13,12 +13,13 @@ case class Event(
 )
 
 class EventServer(
-  events: List[Event],
+  events: Map[String,Event],
   port: Int
 ){
 
   def start() = {
     val server = new ServerSocket(port)
+    val eventActor = new EventActor
 
     while(true) {
       val sock = server.accept
@@ -31,8 +32,19 @@ class EventServer(
         //Switch to correct action based on command
         command match {
           case "PING" =>
-            sockOut.println("PONG");
+            sockOut.println("PONG")
+            sockOut.flush
           case "GET_LIVESTATUS" =>
+            val eventName = sockIn.readLine
+            if(events.contains(eventName)) {
+              val event = events(eventName)
+              val isLive = eventActor.isEventLive(event)
+              sockOut.println(isLive)
+              sockOut.flush
+            } else {
+              sockOut.println("false")
+              sockOut.flush
+            }
           case _ =>
         }
       } catch {

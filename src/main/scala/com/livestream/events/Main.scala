@@ -2,7 +2,11 @@ package com.livestream.events
 
 object Main extends App {
   val eventServer = new EventServer(
-    List[Event](),
+    Map[String,Event](
+      "Wimbledon Day 5" -> new Event(
+        "Wimbledon Day 5",
+        "http://api.new.livestream.com/accounts/Wimbledon/events/Day5")
+    ),
     9999
   )
 
