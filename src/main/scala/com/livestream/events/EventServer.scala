@@ -20,15 +20,26 @@ class EventServer(
 
   while(true) {
     val sock = server.accept
-    val sockIn = new BufferedReader(new InputStreamReader(sock.getInputStream))
-    val sockOut = new PrintWriter(sock.getOutputStream)
+    try {
+      val sockIn = new BufferedReader(new InputStreamReader(sock.getInputStream))
+      val sockOut = new PrintWriter(sock.getOutputStream)
 
-    val command = sockIn.readLine
+      val command = sockIn.readLine
 
-    //Switch to correct action based on command
-    command match {
-      case "PING" =>
-      case "GET_LIVESTATUS" =>
+      //Switch to correct action based on command
+      command match {
+        case "PING" =>
+          sockOut.println("PONG");
+        case "GET_LIVESTATUS" =>
+        case _ =>
+      }
+    } catch {
+      case ex: Exception =>
+        ex.printStackTrace
+    } finally {
+      try { sockIn.close } catch { case ex: Exception => ex.printStackTrace }
+      try { sockOut.close } catch { case ex: Exception => ex.printStackTrace }
+      try { sock.close } catch { case ex: Exception => ex.printStackTrace }
     }
   }
 }
