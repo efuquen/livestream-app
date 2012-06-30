@@ -33,7 +33,6 @@ class EventClient(
               Thread.sleep(pollInterval)
             } catch {
               case ex: InterruptedException =>
-                println("Interrupt client")
                 Thread.currentThread.interrupt
               case ex: Exception =>
                 ex.printStackTrace

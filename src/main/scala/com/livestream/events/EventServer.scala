@@ -4,6 +4,8 @@ import java.net.ServerSocket
 
 import java.io.{BufferedReader,InputStreamReader,PrintWriter}
 
+import java.util.concurrent.{ThreadPoolExecutor, TimeUnit, LinkedBlockingQueue}
+
 /**
  * All events will be modeled  here
 **/
@@ -21,6 +23,10 @@ class EventServer(
   val server = new ServerSocket(port)
   val eventActor = new EventActor
 
+  val sockThreadPool = new ThreadPoolExecutor(
+    20, 50, 60, TimeUnit.MINUTES, new LinkedBlockingQueue[Runnable]
+  )
+
   val lock = new Object
   val serverThread = new Thread(new Runnable { def run {
     println("Event Server Started")
@@ -28,7 +34,7 @@ class EventServer(
       val sock = server.accept
       val sockIn = new BufferedReader(new InputStreamReader(sock.getInputStream))
       val sockOut = new PrintWriter(sock.getOutputStream)
-      try {
+      sockThreadPool.execute(new Runnable { def run { try {
         var keepAlive = true
         while(keepAlive) {
           val command = sockIn.readLine
@@ -62,12 +68,12 @@ class EventServer(
         try { sockIn.close } catch { case ex: Exception => ex.printStackTrace }
         try { sockOut.close } catch { case ex: Exception => ex.printStackTrace }
         try { sock.close } catch { case ex: Exception => ex.printStackTrace }
-      }
+      }}})
     }
     println("Event Server Stopped")
   }})
 
 
   def start { serverThread.start }
-  def stop { server.close }
+  def stop { sockThreadPool.shutdown; server.close; }
 }
