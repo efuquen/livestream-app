@@ -9,7 +9,7 @@ object EventsBuild extends Build {
     settings = Project.defaultSettings ++ Seq(
       name := "events",
       organization := "com.livestream",
-      version := "0.1-SNAPSHOT",
+      version := "0.1",
       scalaVersion := "2.9.1"
       // add other settings here
     )
