@@ -21,35 +21,41 @@ class EventServer(
     val server = new ServerSocket(port)
     val eventActor = new EventActor
 
-    while(true) {
+    println("Event Server started")
+    while(!Thread.interrupted) {
       val sock = server.accept
       val sockIn = new BufferedReader(new InputStreamReader(sock.getInputStream))
       val sockOut = new PrintWriter(sock.getOutputStream)
       try {
-
-        val command = sockIn.readLine
-
-        //Switch to correct action based on command
-        command match {
-          case "PING" =>
-            sockOut.println("PONG")
-            sockOut.flush
-          case "GET_LIVESTATUS" =>
-            val eventName = sockIn.readLine
-            if(events.contains(eventName)) {
-              val event = events(eventName)
-              val isLive = eventActor.isEventLive(event)
-              sockOut.println("SEND_LIVESTATUS")
-              sockOut.println(isLive)
+        var keepAlive = true
+        while(keepAlive && !Thread.interrupted) {
+          val command = sockIn.readLine
+          //Switch to correct action based on command
+          command match {
+            case "PING" =>
+              sockOut.println("PONG")
               sockOut.flush
-            } else {
-              sockOut.println("ERROR")
-              sockOut.println("EventDNE")
-              sockOut.flush
-            }
-          case _ =>
+            case "GET_LIVESTATUS" =>
+              val eventName = sockIn.readLine
+              if(events.contains(eventName)) {
+                val event = events(eventName)
+                val isLive = eventActor.isEventLive(event)
+                sockOut.println("SEND_LIVESTATUS")
+                sockOut.println(isLive)
+                sockOut.flush
+              } else {
+                sockOut.println("ERROR")
+                sockOut.println("EventDNE")
+                sockOut.flush
+              }
+            //Any other command will close the connection
+            case _ =>
+              keepAlive = false
+          }
         }
       } catch {
+        case ex: InterruptedException =>
+          Thread.currentThread.interrupt 
         case ex: Exception =>
           ex.printStackTrace
       } finally {
@@ -58,5 +64,7 @@ class EventServer(
         try { sock.close } catch { case ex: Exception => ex.printStackTrace }
       }
     }
+
+    println("Event Server stopped")
   }
 }
