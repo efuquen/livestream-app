@@ -1,5 +1,47 @@
-A sample for the Typesafe Stack (http://typesafe.com/stack).
+A sample application client/server application that provides simple commands to:
 
-Scala sample project using Scala and SBT.
+  PING and PONG
+  GET_LIVESTATUS and SEND_LIVESTATUS of an single event, labled "Wimbledon Day 5"
 
-To run and test it use SBT invoke: 'sbt run'
+Protocol
+========
+
+Simple text based protocol, each token seperated by a line break. Below is an
+example telnet session from the code in server mode, to demonstrate the
+protocol, with annotations provided
+
+*PING                         
+PONG                         
+*GET_LIVESTATUS               
+Wimbledon Day 5 
+*SEND_LIVESTATUS
+false
+*GET_LIVESTATUS
+abc
+*ERROR
+EventDNE
+*close
+
+Client commands have a "*" in front of them, but those aren't part of the
+protocol.  Last thing to  note, any command that is not part of the protocol
+will cause the connection to close (in this case "close" was typed in, but
+anything would work).
+
+Running
+=======
+
+at the root level there is a self contained jar that includes all depedencies.
+There are two modes
+
+java -jar events_2.9.1-0.2-one-jar.jar server
+
+will run the jar in server mode, so you can keep it running indefinitely while
+you telnet onto the port (9999) to test the comands.
+
+java -jar events_2.9.1-0.2-one-jar.jar demo [poll-interval] [run-time]
+
+will run the jar in demo mode, which will start a server and then a client.
+The client will poll the server ever [poll-interval] seconds for a total of
+[run-time] seconds and then both will shutdown and the process will exit.  The
+client will print out the status every [poll-interval] seconds to standard
+out.

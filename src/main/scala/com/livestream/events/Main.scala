@@ -2,59 +2,73 @@ package com.livestream.events
 
 import java.util.Date
 
+/**
+ *  Launcher Object.  Will run in two modes
+ *  
+ *  server - will run just the server, can telnet to run commands
+ *
+ *  client - will run server and then a test client to poll at interval
+ *           for a set amount of time.
+ **/
 object Main extends App {
- 
-  val eventServer = new EventServer(
-    Map[String,Event](
-      "Wimbledon Day 5" -> new Event(
-        "Wimbledon Day 5",
-        "http://api.new.livestream.com/accounts/Wimbledon/events/Day5")
-    ),
-    9999
-  )
-
-  eventServer.start
-
-  Thread.sleep(3600 * 1000)
-
-
-/*if(args.length != 2) {
-  println("required args, in seconds: [poll-interval] [run-time]")
+if(args.length == 0) {
+  println("must at least one arg: server|demo")
 } else {
-  val pollInterval = args(0).toInt
-  val runTime = args(1).toInt
+  args(0) match {
+    case "server" =>
+      val eventServer = new EventServer(
+        Map[String,Event](
+          "Wimbledon Day 5" -> new Event(
+            "Wimbledon Day 5",
+            "http://api.new.livestream.com/accounts/Wimbledon/events/Day5")
+        ),
+        9999
+      )
 
-  val eventServer = new EventServer(
-    Map[String,Event](
-      "Wimbledon Day 5" -> new Event(
-        "Wimbledon Day 5",
-        "http://api.new.livestream.com/accounts/Wimbledon/events/Day5")
-    ),
-    9999
-  )
+      eventServer.start
+    case "demo" =>
+      if(args.length != 3) {
+        println("required args for demo mode, in seconds: [poll-interval] [run-time]")
+      } else {
 
-  eventServer.start
+        val pollInterval = args(1).toInt
+        val runTime = args(2).toInt
 
-  //hack, make sure event server starts
-  Thread.sleep(2000)
+        val eventServer = new EventServer(
+          Map[String,Event](
+            "Wimbledon Day 5" -> new Event(
+              "Wimbledon Day 5",
+              "http://api.new.livestream.com/accounts/Wimbledon/events/Day5")
+          ),
+          9999
+        )
 
-  val eventHandler = (eventName: String, isLive: Boolean) => 
-      println("%s - %s - Event:'%s' Status: %s".format(
-        new Date, Thread.currentThread.getName, eventName, isLive))
+        eventServer.start
 
-  val eventClient = new EventClient("localhost", 9999)
-  eventClient.startPoll(
-    "Wimbledon Day 5",
-    pollInterval * 1000,
-    eventHandler
-  )
- 
-  Thread.sleep(runTime * 1000)
+        //hack, make sure event server starts
+        Thread.sleep(2000)
 
-  eventClient.stopPoll
-  eventClient.close
+        val eventHandler = (eventName: String, isLive: Boolean) => 
+            println("%s - %s - Event:'%s' Status: %s".format(
+              new Date, Thread.currentThread.getName, eventName, isLive))
 
-  eventServer.stop
-  println("Done")
-}*/
+        val eventClient = new EventClient("localhost", 9999)
+        eventClient.startPoll(
+          "Wimbledon Day 5",
+          pollInterval * 1000,
+          eventHandler
+        )
+       
+        Thread.sleep(runTime * 1000)
+
+        eventClient.stopPoll
+        eventClient.close
+
+        eventServer.stop
+        println("Done")
+      }
+    case _ =>
+      println("invalid mode: %s".format(args(0)))
+  }
+}
 }

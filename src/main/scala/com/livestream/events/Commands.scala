@@ -1,5 +1,8 @@
 package com.livestream.events
 
+/**
+ * constants for possible commands
+ **/
 object Commands {
   val PING = "PING"
   val PONG = "PONG"

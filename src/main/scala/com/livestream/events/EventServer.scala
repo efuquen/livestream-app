@@ -16,7 +16,11 @@ case class Event(
   val url: String
 )
 
-//EventServer not usable after stop
+/*
+ * Server setup and teardown, starts listening in on port
+ * provided and will give status of mapped events.  Once
+ * stop is called can't be restarted.
+ */
 class EventServer(
   events: Map[String,Event],
   port: Int
@@ -35,7 +39,7 @@ class EventServer(
         val sockIn = new BufferedReader(new InputStreamReader(sock.getInputStream))
         val sockOut = new PrintWriter(sock.getOutputStream)
         actorSystem.actorOf(Props(
-          new SocketActor(sock, sockIn, sockOut, eventActor)
+          new SocketActor(sock, sockIn, sockOut, eventActor, events)
         ))
       } catch {
         case ex: Exception =>
@@ -47,5 +51,5 @@ class EventServer(
 
 
   def start { serverThread.start }
-  def stop { server.close }
+  def stop { actorSystem.shutdown; server.close; }
 }

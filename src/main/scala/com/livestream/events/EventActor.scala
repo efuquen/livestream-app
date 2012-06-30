@@ -10,6 +10,11 @@ import com.codahale.jerkson.Json._
 
 import akka.actor.Actor
 
+/*
+ *  Will query the url for a specific event to see if its live.
+ *  Returns the result to the calling actor with a boolean.
+ */
+
 class EventActor extends Actor {
 
   private def getURLString(urlStr: String): String = {
@@ -24,7 +29,7 @@ class EventActor extends Actor {
     }
   }
 
-  def isEventLive(event: Event): Boolean = {
+  private def isEventLive(event: Event): Boolean = {
     val jsonStr = getURLString(event.url)
     val jsonMap = parse[Map[String,Any]](jsonStr)
     val broadcastId = jsonMap("broadcast_id").toString.toInt
@@ -33,6 +38,6 @@ class EventActor extends Actor {
 
   def receive = {
     case ('GetEventLive, event: Event) =>
-      sender ! (('SendEventLive, event, isEventLive(event)))
+      sender ! (('SendEventLive, isEventLive(event)))
   }
 }
