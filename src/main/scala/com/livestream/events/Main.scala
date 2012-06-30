@@ -3,7 +3,22 @@ package com.livestream.events
 import java.util.Date
 
 object Main extends App {
-if(args.length != 2) {
+ 
+  val eventServer = new EventServer(
+    Map[String,Event](
+      "Wimbledon Day 5" -> new Event(
+        "Wimbledon Day 5",
+        "http://api.new.livestream.com/accounts/Wimbledon/events/Day5")
+    ),
+    9999
+  )
+
+  eventServer.start
+
+  Thread.sleep(3600 * 1000)
+
+
+/*if(args.length != 2) {
   println("required args, in seconds: [poll-interval] [run-time]")
 } else {
   val pollInterval = args(0).toInt
@@ -41,4 +56,5 @@ if(args.length != 2) {
 
   eventServer.stop
   println("Done")
-}}
+}*/
+}

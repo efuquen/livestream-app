@@ -6,6 +6,8 @@ import java.io.{BufferedReader,InputStreamReader,PrintWriter}
 
 import java.util.concurrent.{ThreadPoolExecutor, TimeUnit, LinkedBlockingQueue}
 
+import akka.actor._
+
 /**
  * All events will be modeled  here
 **/
@@ -21,65 +23,20 @@ class EventServer(
 ) {
   
   val server = new ServerSocket(port)
-  val eventActor = new EventActor
 
-  val sockThreadPool = new ThreadPoolExecutor(
-    20, 50, 60, TimeUnit.MINUTES, new LinkedBlockingQueue[Runnable]
-  )
+  val actorSystem = ActorSystem("EventServerActors")
+  val eventActor = actorSystem.actorOf(Props[EventActor], name="eventActor")
 
-  class SockRunnable(
-    sock: Socket,
-    sockIn: BufferedReader,
-    sockOut: PrintWriter
-  ) extends Runnable {
-    override def run {
-      try {
-        var keepAlive = true
-        while(keepAlive) {
-          val command = sockIn.readLine
-          //Switch to correct action based on command
-          command match {
-            case Commands.PING =>
-              sockOut.println(Commands.PONG)
-              sockOut.flush
-            case Commands.GET_LIVESTATUS =>
-              val eventName = sockIn.readLine
-              if(events.contains(eventName)) {
-                val event = events(eventName)
-                val isLive = eventActor.isEventLive(event)
-                sockOut.println(Commands.SEND_LIVESTATUS)
-                sockOut.println(isLive)
-                sockOut.flush
-              } else {
-                sockOut.println(Commands.ERROR)
-                sockOut.println("EventDNE")
-                sockOut.flush
-              }
-            //Any other command will close the connection
-            case _ =>
-              keepAlive = false
-          }
-        }
-      } catch {
-        case ex: Exception =>
-          Thread.currentThread.interrupt 
-      } finally {
-        try { sockIn.close } catch { case ex: Exception => ex.printStackTrace }
-        try { sockOut.close } catch { case ex: Exception => ex.printStackTrace }
-        try { sock.close } catch { case ex: Exception => ex.printStackTrace }
-      }
-    }
-  }
-
-  val lock = new Object
-  val serverThread = new Thread(new Runnable { def run {
+  val serverThread = new Thread( new Runnable { def run {
     println("Event Server Started")
     while(!Thread.interrupted) {
       try {
         val sock = server.accept
         val sockIn = new BufferedReader(new InputStreamReader(sock.getInputStream))
         val sockOut = new PrintWriter(sock.getOutputStream)
-        sockThreadPool.execute(new SockRunnable(sock, sockIn, sockOut))
+        actorSystem.actorOf(Props(
+          new SocketActor(sock, sockIn, sockOut, eventActor)
+        ))
       } catch {
         case ex: Exception =>
           Thread.currentThread.interrupt
@@ -90,5 +47,5 @@ class EventServer(
 
 
   def start { serverThread.start }
-  def stop { sockThreadPool.shutdown; server.close; }
+  def stop { server.close }
 }

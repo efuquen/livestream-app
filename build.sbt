@@ -10,6 +10,7 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 
 libraryDependencies ++= Seq(
   "com.codahale" %% "jerkson" % "0.5.0",
-  "commons-io" % "commons-io" % "2.3"
+  "commons-io" % "commons-io" % "2.3",
+  "com.typesafe.akka" % "akka-actor" % "2.0.2"
 )
 
