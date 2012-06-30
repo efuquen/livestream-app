@@ -11,4 +11,6 @@ object Main extends App {
   )
 
   eventServer.start
+
+  val eventClient = new EventClient("localhost", 9999)
 }

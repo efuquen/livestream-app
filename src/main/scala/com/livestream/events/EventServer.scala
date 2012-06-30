@@ -32,19 +32,19 @@ class EventServer(
           val command = sockIn.readLine
           //Switch to correct action based on command
           command match {
-            case "PING" =>
-              sockOut.println("PONG")
+            case Commands.PING =>
+              sockOut.println(Commands.PONG)
               sockOut.flush
-            case "GET_LIVESTATUS" =>
+            case Commands.GET_LIVESTATUS =>
               val eventName = sockIn.readLine
               if(events.contains(eventName)) {
                 val event = events(eventName)
                 val isLive = eventActor.isEventLive(event)
-                sockOut.println("SEND_LIVESTATUS")
+                sockOut.println(Commands.SEND_LIVESTATUS)
                 sockOut.println(isLive)
                 sockOut.flush
               } else {
-                sockOut.println("ERROR")
+                sockOut.println(Commands.ERROR)
                 sockOut.println("EventDNE")
                 sockOut.flush
               }
