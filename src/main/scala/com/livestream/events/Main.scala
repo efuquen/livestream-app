@@ -20,7 +20,34 @@ if(args.length == 0) {
         Map[String,Event](
           "Wimbledon Day 5" -> new Event(
             "Wimbledon Day 5",
-            "http://api.new.livestream.com/accounts/Wimbledon/events/Day5")
+            "http://api.new.livestream.com/accounts/Wimbledon/events/Day5"),
+          "Wimbledon Day 6" -> new Event(
+            "Wimbledon Day 6",
+            "http://api.new.livestream.com/accounts/Wimbledon/events/Day6"),
+          "Wimbledon Day 7" -> new Event(
+            "Wimbledon Day 7",
+            "http://api.new.livestream.com/accounts/Wimbledon/events/Day7"),
+          "Wimbledon Day 8" -> new Event(
+            "Wimbledon Day 8",
+            "http://api.new.livestream.com/accounts/Wimbledon/events/Day8"),
+          "Wimbledon Day 9" -> new Event(
+            "Wimbledon Day 9",
+            "http://api.new.livestream.com/accounts/Wimbledon/events/Day9"),
+          "Wimbledon Day 10" -> new Event(
+            "Wimbledon Day 10",
+            "http://api.new.livestream.com/accounts/Wimbledon/events/Day10"),
+          "Wimbledon Day 11" -> new Event(
+            "Wimbledon Day 11",
+            "http://api.new.livestream.com/accounts/Wimbledon/events/Day11"),
+          "Wimbledon Day 12" -> new Event(
+            "Wimbledon Day 12",
+            "http://api.new.livestream.com/accounts/Wimbledon/events/Day12"),
+          "Wimbledon Day 13" -> new Event(
+            "Wimbledon Day 13",
+            "http://api.new.livestream.com/accounts/Wimbledon/events/Day13"),
+          "Wimbledon Day 14" -> new Event(
+            "Wimbledon Day 14",
+            "http://api.new.livestream.com/accounts/Wimbledon/events/Day14")
         ),
         9999
       )
